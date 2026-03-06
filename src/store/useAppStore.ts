@@ -40,6 +40,12 @@ interface AppState {
     markNotificationAsRead: (id: string) => void;
     markAllNotificationsAsRead: () => void;
 
+    // History/Log delete actions
+    deleteVehicleHistoryEntry: (vehicleId: string, historyId: string) => void;
+    deleteMedicineLog: (medicineId: string, logId: string) => void;
+    deleteDocumentHistory: (docId: string, historyId: string) => void;
+    clearAllHistory: () => void;
+
     // Reset/Load
     loadSampleData: () => void;
     importData: (data: Partial<AppState>) => void;
@@ -93,6 +99,37 @@ export const useAppStore = create<AppState>()(
                 })),
             deleteDebt: (id) =>
                 set((state) => ({ debts: state.debts.filter((d) => d.id !== id) })),
+
+            deleteVehicleHistoryEntry: (vehicleId, historyId) =>
+                set((state) => ({
+                    vehicles: state.vehicles.map((v) =>
+                        v.id === vehicleId
+                            ? { ...v, history: v.history.filter((h) => h.id !== historyId) }
+                            : v
+                    ),
+                })),
+            deleteMedicineLog: (medicineId, logId) =>
+                set((state) => ({
+                    medicines: state.medicines.map((m) =>
+                        m.id === medicineId
+                            ? { ...m, logs: m.logs.filter((l) => l.id !== logId) }
+                            : m
+                    ),
+                })),
+            deleteDocumentHistory: (docId, historyId) =>
+                set((state) => ({
+                    documents: state.documents.map((d) =>
+                        d.id === docId
+                            ? { ...d, history: (d.history || []).filter((h) => h.id !== historyId) }
+                            : d
+                    ),
+                })),
+            clearAllHistory: () =>
+                set((state) => ({
+                    vehicles: state.vehicles.map((v) => ({ ...v, history: [] })),
+                    medicines: state.medicines.map((m) => ({ ...m, logs: [] })),
+                    documents: state.documents.map((d) => ({ ...d, history: [] })),
+                })),
 
             addNotification: (notif) =>
                 set((state) => ({

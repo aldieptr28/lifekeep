@@ -1,30 +1,37 @@
+import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Plus, Check, Trash2, HelpCircle } from 'lucide-react';
+import { Plus, Check, Trash2, HelpCircle, Pencil, MoreVertical } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 import { formatCurrency, formatDate } from '../lib/utils';
-// Note: We are using placeholder handlers for add, update, delete modal actions for now
-// to quickly render the UI outline requested in the plan!
+import { DebtFormSheet } from '../components/debts/DebtFormSheet';
+import type { Debt } from '../types';
+import { toast } from 'sonner';
 
 export default function Debts() {
     const { debts, deleteDebt, updateDebt } = useAppStore();
+    const [addSheetOpen, setAddSheetOpen] = useState(false);
+    const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
 
     const utang = debts.filter(d => d.type === 'to_other');
     const piutang = debts.filter(d => d.type === 'to_me');
 
     const handleMarkAsPaid = (id: string) => {
         updateDebt(id, { status: 'paid' });
+        toast.success('Ditandai Lunas', { description: 'Catatan diperbarui menjadi lunas.' });
     };
 
-    const handleDelete = (id: string) => {
-        if (confirm('Apakah Anda yakin ingin menghapus catatan utang/piutang ini?')) {
-            deleteDebt(id);
+    const handleDelete = (debt: Debt) => {
+        if (confirm(`Hapus catatan "${debt.personName}"? Tindakan ini tidak dapat dibatalkan.`)) {
+            deleteDebt(debt.id);
+            toast.success('Catatan Dihapus');
         }
     };
 
-    const renderDebtCard = (debt: any) => {
+    const renderDebtCard = (debt: Debt) => {
         const isPaid = debt.status === 'paid';
         return (
             <Card key={debt.id} className={`border-border/50 relative overflow-hidden transition-all ${isPaid ? 'opacity-70 bg-card/40' : 'bg-card/80 shadow-sm hover:shadow-md'}`}>
@@ -34,7 +41,9 @@ export default function Debts() {
                             <h3 className="font-display font-bold text-lg">{debt.personName}</h3>
                             <Badge variant={isPaid ? "default" : "destructive"}>{isPaid ? 'Lunas' : 'Belum Lunas'}</Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">{debt.description}</p>
+                        {debt.description && (
+                            <p className="text-sm text-muted-foreground">{debt.description}</p>
+                        )}
                         <div className="flex flex-wrap gap-4 text-xs mt-3 text-muted-foreground">
                             <span>Dibuat: {formatDate(debt.date)}</span>
                             {debt.dueDate && <span>Jatuh Tempo: {formatDate(debt.dueDate)}</span>}
@@ -45,15 +54,33 @@ export default function Debts() {
                         <span className="font-display font-bold space-x-1 whitespace-nowrap text-xl">
                             {formatCurrency(debt.amount)}
                         </span>
-                        <div className="flex gap-2 w-full md:w-auto">
+                        <div className="flex gap-2 w-full md:w-auto items-center">
                             {!isPaid && (
                                 <Button size="sm" variant="outline" className="flex-1 md:flex-none border-primary text-primary hover:bg-primary/10" onClick={() => handleMarkAsPaid(debt.id)}>
                                     <Check className="w-4 h-4 mr-1" /> Lunas
                                 </Button>
                             )}
-                            <Button size="icon" variant="destructive" className="h-9 w-9" onClick={() => handleDelete(debt.id)}>
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button size="icon" variant="ghost" aria-label="Opsi catatan" className="h-9 w-9">
+                                        <MoreVertical className="w-4 h-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setEditingDebt(debt)}>
+                                        <Pencil className="w-4 h-4 mr-2" />
+                                        Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        className="text-destructive focus:text-destructive"
+                                        onClick={() => handleDelete(debt)}
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Hapus
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
                 </CardContent>
@@ -68,15 +95,15 @@ export default function Debts() {
                     <h1 className="text-3xl font-display font-bold tracking-tight">Utang Piutang</h1>
                     <p className="text-muted-foreground mt-1">Kelola catatan utang dan piutang Anda.</p>
                 </div>
-                <Button className="w-full md:w-auto shadow-lg shadow-accent/20">
+                <Button className="w-full md:w-auto shadow-lg shadow-accent/20" onClick={() => setAddSheetOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" /> Catat Baru
                 </Button>
             </div>
 
             <Tabs defaultValue="to_me" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-6">
-                    <TabsTrigger value="to_me">Piutang Kepadaku</TabsTrigger>
-                    <TabsTrigger value="to_other">Utangku (Kewajiban)</TabsTrigger>
+                    <TabsTrigger value="to_me">Piutang Kepadaku ({piutang.length})</TabsTrigger>
+                    <TabsTrigger value="to_other">Utangku ({utang.length})</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="to_me" className="m-0 space-y-4">
@@ -107,6 +134,18 @@ export default function Debts() {
                     )}
                 </TabsContent>
             </Tabs>
+
+            {/* Add Sheet */}
+            <DebtFormSheet open={addSheetOpen} onOpenChange={setAddSheetOpen} />
+
+            {/* Edit Sheet */}
+            {editingDebt && (
+                <DebtFormSheet
+                    open={!!editingDebt}
+                    onOpenChange={(open) => { if (!open) setEditingDebt(null); }}
+                    debt={editingDebt}
+                />
+            )}
         </div>
     );
 }

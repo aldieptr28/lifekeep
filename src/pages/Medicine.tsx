@@ -1,14 +1,26 @@
+import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Pill, Activity, MoreVertical, AlertTriangle } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { Pill, Activity, MoreVertical, AlertTriangle, Pencil, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Medicine } from '../types';
 import { MedicineFormSheet } from '../components/medicine/MedicineFormSheet';
+import { MedicineEditSheet } from '../components/medicine/MedicineEditSheet';
 import { UpdateStockDialog } from '../components/medicine/UpdateStockDialog';
+import { toast } from 'sonner';
 
 export default function MedicinePage() {
-    const { medicines } = useAppStore();
+    const { medicines, deleteMedicine } = useAppStore();
+    const [editingMed, setEditingMed] = useState<Medicine | null>(null);
+
+    const handleDelete = (med: Medicine) => {
+        if (confirm(`Hapus "${med.name}" dari inventaris? Tindakan ini tidak dapat dibatalkan.`)) {
+            deleteMedicine(med.id);
+            toast.success('Obat Dihapus', { description: `${med.name} telah dihapus dari inventaris.` });
+        }
+    };
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -63,9 +75,32 @@ export default function MedicinePage() {
                                             <CardTitle className="text-xl font-bold font-display leading-tight mt-1">{med.name}</CardTitle>
                                             <CardDescription className="opacity-80 mt-1">{med.category} • {med.unit}</CardDescription>
                                         </div>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 -mt-2 -mr-2 text-muted-foreground hover:bg-muted/50">
-                                            <MoreVertical className="w-4 h-4" />
-                                        </Button>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    aria-label="Opsi obat"
+                                                    className="h-8 w-8 -mt-2 -mr-2 text-muted-foreground hover:bg-muted/50"
+                                                >
+                                                    <MoreVertical className="w-4 h-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => setEditingMed(med)}>
+                                                    <Pencil className="w-4 h-4 mr-2" />
+                                                    Edit
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    className="text-destructive focus:text-destructive"
+                                                    onClick={() => handleDelete(med)}
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Hapus
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </CardHeader>
                                     <CardContent className="flex-1 flex flex-col justify-end pt-2">
                                         <div className="space-y-4 flex-1 flex flex-col justify-end">
@@ -77,7 +112,7 @@ export default function MedicinePage() {
                                                     <div>
                                                         <p className="text-xs text-muted-foreground mb-0.5">Sisa Stok</p>
                                                         <span className={`font-semibold text-lg tracking-tight leading-none ${isOutOfStock ? 'text-destructive' : ''}`}>
-                                                            {med.currentStock}
+                                                            {med.currentStock} <span className="text-xs font-normal text-muted-foreground">{med.unit}</span>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -86,7 +121,7 @@ export default function MedicinePage() {
 
                                             {med.notes && (
                                                 <p className="text-xs text-muted-foreground italic line-clamp-2">
-                                                    "{med.notes}"
+                                                    {med.notes}
                                                 </p>
                                             )}
                                         </div>
@@ -96,6 +131,14 @@ export default function MedicinePage() {
                         );
                     })}
                 </div>
+            )}
+
+            {editingMed && (
+                <MedicineEditSheet
+                    medicine={editingMed}
+                    open={!!editingMed}
+                    onOpenChange={(open) => { if (!open) setEditingMed(null); }}
+                />
             )}
         </div>
     );

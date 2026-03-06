@@ -1,24 +1,34 @@
+import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { FileText, MoreVertical, CalendarClock, ShieldAlert } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { FileText, MoreVertical, CalendarClock, ShieldAlert, Pencil, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { DocumentItem } from '../types';
 import { format, differenceInDays } from 'date-fns';
 import { DocumentFormSheet } from '../components/documents/DocumentFormSheet';
+import { DocumentEditSheet } from '../components/documents/DocumentEditSheet';
+import { toast } from 'sonner';
 
 export default function Documents() {
-    const { documents } = useAppStore();
+    const { documents, deleteDocument } = useAppStore();
+    const [editingDoc, setEditingDoc] = useState<DocumentItem | null>(null);
 
     const getStatus = (doc: DocumentItem) => {
         if (!doc.expiryDate) return { label: 'Permanen', color: 'bg-muted text-muted-foreground', border: 'border-border' };
-
         const daysLeft = differenceInDays(new Date(doc.expiryDate), new Date());
-
         if (daysLeft < 0) return { label: 'Expired', color: 'bg-destructive/10 text-destructive', border: 'border-destructive/30' };
         if (daysLeft <= 7) return { label: 'Kritis', color: 'bg-warning/10 text-warning', border: 'border-warning/30' };
         if (daysLeft <= 30) return { label: 'Perhatian', color: 'bg-blue-500/10 text-blue-500', border: 'border-blue-500/30' };
         return { label: 'Aman', color: 'bg-primary/10 text-primary', border: 'border-primary/30' };
+    };
+
+    const handleDelete = (doc: DocumentItem) => {
+        if (confirm(`Hapus dokumen "${doc.type}"? Tindakan ini tidak dapat dibatalkan.`)) {
+            deleteDocument(doc.id);
+            toast.success('Dokumen Dihapus', { description: `${doc.type} telah dihapus.` });
+        }
     };
 
     return (
@@ -64,9 +74,32 @@ export default function Documents() {
                                             <CardTitle className="text-xl font-bold font-display leading-tight mt-1">{doc.type}</CardTitle>
                                             <CardDescription className="opacity-80 mt-1">{doc.ownerName}</CardDescription>
                                         </div>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 -mt-2 -mr-2 text-muted-foreground hover:bg-muted/50">
-                                            <MoreVertical className="w-4 h-4" />
-                                        </Button>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    aria-label="Opsi dokumen"
+                                                    className="h-8 w-8 -mt-2 -mr-2 text-muted-foreground hover:bg-muted/50"
+                                                >
+                                                    <MoreVertical className="w-4 h-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => setEditingDoc(doc)}>
+                                                    <Pencil className="w-4 h-4 mr-2" />
+                                                    Edit
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    className="text-destructive focus:text-destructive"
+                                                    onClick={() => handleDelete(doc)}
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Hapus
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </CardHeader>
                                     <CardContent className="flex-1 flex flex-col justify-end pt-2">
                                         {doc.expiryDate ? (
@@ -93,6 +126,14 @@ export default function Documents() {
                         );
                     })}
                 </div>
+            )}
+
+            {editingDoc && (
+                <DocumentEditSheet
+                    doc={editingDoc}
+                    open={!!editingDoc}
+                    onOpenChange={(open) => { if (!open) setEditingDoc(null); }}
+                />
             )}
         </div>
     );

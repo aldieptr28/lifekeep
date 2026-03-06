@@ -90,23 +90,23 @@ export function DataManagementDialog() {
                 </DialogHeader>
 
                 <div className="flex flex-col gap-4 py-4">
-                    <Button onClick={handleExport} className="w-full flex items-center justify-start gap-3 h-12" variant="outline">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <Button onClick={handleExport} className="w-full flex items-center justify-start gap-3 h-auto py-3 px-4" variant="outline">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                             <Download className="w-4 h-4" />
                         </div>
                         <div className="flex flex-col items-start gap-0.5 text-left">
                             <span className="font-semibold text-sm">Backup Data (Ekspor)</span>
-                            <span className="text-xs text-muted-foreground font-normal">Unduh semua data LifeKeep ke perangkat Anda</span>
+                            <span className="text-[11px] md:text-xs text-muted-foreground font-normal whitespace-normal leading-snug">Unduh semua data LifeKeep ke perangkat Anda</span>
                         </div>
                     </Button>
 
-                    <Button onClick={handleImportClick} className="w-full flex items-center justify-start gap-3 h-12" variant="outline">
-                        <div className="w-8 h-8 rounded-full bg-warning/10 text-warning flex items-center justify-center">
+                    <Button onClick={handleImportClick} className="w-full flex items-center justify-start gap-3 h-auto py-3 px-4" variant="outline">
+                        <div className="w-8 h-8 rounded-full bg-warning/10 text-warning flex items-center justify-center shrink-0">
                             <Upload className="w-4 h-4" />
                         </div>
                         <div className="flex flex-col items-start gap-0.5 text-left">
                             <span className="font-semibold text-sm">Restore Data (Impor)</span>
-                            <span className="text-xs text-muted-foreground font-normal">Ganti seluruh data dari file backup JSON</span>
+                            <span className="text-[11px] md:text-xs text-muted-foreground font-normal whitespace-normal leading-snug">Ganti seluruh data dari file backup JSON</span>
                         </div>
                     </Button>
 
