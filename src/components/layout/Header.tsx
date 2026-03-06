@@ -88,7 +88,7 @@ export function Header({ isMobile }: { isMobile: boolean }) {
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                     transition={{ duration: 0.2 }}
-                                    className="absolute right-0 mt-2 w-80 sm:w-96 bg-popover border border-border shadow-lg rounded-xl overflow-hidden z-50 flex flex-col max-h-[400px]"
+                                    className="fixed left-4 right-4 top-20 sm:absolute sm:top-full sm:left-auto sm:right-0 sm:mt-2 sm:w-96 bg-popover border border-border shadow-lg rounded-xl overflow-hidden z-[100] flex flex-col max-h-[70vh] sm:max-h-[400px]"
                                 >
                                     <div className="p-4 border-b border-border flex justify-between items-center bg-muted/30">
                                         <div className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export function Header({ isMobile }: { isMobile: boolean }) {
                     </AnimatePresence>
                 </div>
 
-                <Button variant="ghost" size="icon" className="rounded-full hidden sm:flex" onClick={toggleTheme}>
+                <Button variant="ghost" size="icon" className="rounded-full shrink-0" onClick={toggleTheme}>
                     {theme === 'light' ? (
                         <Moon className="w-5 h-5 text-muted-foreground" />
                     ) : (
@@ -168,7 +168,7 @@ export function Header({ isMobile }: { isMobile: boolean }) {
                     )}
                 </Button>
 
-                <div className="w-px h-6 bg-border mx-1"></div>
+                <div className="hidden sm:block w-px h-6 bg-border mx-1"></div>
 
                 <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={logout}>
                     <LogOut className="w-5 h-5" />

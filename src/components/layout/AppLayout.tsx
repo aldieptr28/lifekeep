@@ -50,15 +50,15 @@ export function AppLayout() {
     }
 
     return (
-        <div className="flex h-screen w-full bg-background overflow-hidden relative noise-texture">
+        <div className="flex h-[100dvh] w-full bg-background overflow-hidden relative noise-texture">
             {/* Desktop Sidebar */}
             {!isMobile && <Sidebar />}
 
             <div className="flex flex-col flex-1 h-full relative z-10 w-full md:pl-64 transition-all duration-300">
                 <Header isMobile={isMobile} />
 
-                <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 pb-24 md:pb-8">
-                    <div className="max-w-5xl mx-auto w-full h-full">
+                <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8">
+                    <div className="max-w-5xl mx-auto w-full h-full pb-24 sm:pb-32 md:pb-0">
                         <Outlet />
                     </div>
                 </main>

@@ -6,8 +6,8 @@ export function BottomBar() {
     const location = useLocation();
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-t border-border pb-safe">
-            <div className="flex items-center justify-around h-16 px-2">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border pb-safe">
+            <div className="flex items-center justify-between h-16 px-1 sm:px-2">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
 
@@ -26,8 +26,8 @@ export function BottomBar() {
                                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     />
                                 )}
-                                <item.icon className={`w-5 h-5 ${isActive ? 'fill-accent/20 stroke-[2.5px]' : 'stroke-2'}`} />
-                                <span className="text-[10px] font-medium tracking-tight h-3">{item.label}</span>
+                                <item.icon className={`w-[22px] h-[22px] ${isActive ? 'fill-accent/20 stroke-[2.5px]' : 'stroke-2'}`} />
+                                <span className="text-[9px] sm:text-[10px] font-medium tracking-tight truncate w-full text-center px-0.5">{item.label}</span>
                             </div>
                         </Link>
                     );
